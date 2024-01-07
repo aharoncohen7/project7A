@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const mysql = require('mysql2/promise');
+require("dotenv").config();
 
 let dbName = "db";
 let num = 0;
@@ -7,9 +8,7 @@ let num = 0;
 // פרטי חיבור לבסיס הנתונים
 const dbConfig = {
   host: 'localhost',
-  user: 'root',
-  password: '--------',
-  // database: 'sm_users'
+  user: 'root'
 };
 
 // יצירת חיבור לבסיס הנתונים באמצעות connection pool
@@ -17,8 +16,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   host: dbConfig.host,
   user: dbConfig.user,
-  password: dbConfig.password,
-  multipleStatements: true,
+  password: process.env.SQL_PASSWORD,
+  multipleStatements: true
 });
 
 // קריאת קובץ JSON
