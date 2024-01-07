@@ -8,11 +8,29 @@ async function getAllPosts() {
     return posts;
 }
 
+// מיון לפי א ב
+async function getPostsOrderTitle() {
+    const SQL = `select * from posts
+    ORDER BY title;`;
+    const [posts] = await pool.query(SQL);
+    // console.log(posts);
+    return posts;
+}
+// מיון לפי מזהה
+
+async function getPostsOrderId() {
+    const SQL = `select * from posts
+    ORDER BY id;`;
+    const [posts] = await pool.query(SQL);
+    // console.log(posts);
+    return posts;
+}
+
 // פוסט מסויים
 async function getCertainPost(postId) {
     const SQL = `select * from posts where id = ?`;
-    const [post] = await pool.query(SQL, [postId]);
-    // console.log(post);
+    const [[post]] = await pool.query(SQL, [postId]);
+    console.log(post);
     return post;
 }
 
@@ -56,9 +74,8 @@ async function editPost(postId, title, body) {
 async function deletePost(postId) {
     const deletedPost = await getCertainPost(postId)
     const SQL = `delete from posts where id = ?`;
-    const [post] = await pool.query(SQL, [postId]);
-    // console.log(deletedPost);
-    return [post, deletedPost];
+    const [respons] = await pool.query(SQL, [postId]);
+    return  deletedPost;
 }
 
 
@@ -74,6 +91,8 @@ async function deletePost(postId) {
 
 module.exports = {
     getAllPosts,
+    getPostsOrderId,
+    getPostsOrderTitle,
     getCertainPost,
     searchPostByTitle,
     searcById,

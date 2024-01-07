@@ -1,6 +1,37 @@
-const { log } = require('console');
 const pool = require('./main');
-// const getUser = require('./users');
+
+
+async function checkUser(username, password) {
+    const SQL = `SELECT id, username, password
+   FROM users
+   JOIN passwords ON users.id = passwords.userId
+    where username = ? and  password = ?`
+    const [[user]] = await pool.query(SQL, [username, password]);
+    if (user === undefined) {
+        return 0;
+    }
+    else { 
+        console.log(user);
+        return user.id;
+     }
+}
+
+
+// async function test() {
+//     // const data = await checkUser("Bret", 'hildegard.org')
+//     // console.log(data);
+// }
+// test()
+
+module.exports = {
+    checkUser
+};
+
+
+
+
+
+
 
 //השגת סיסמה באמצעות ID
 
@@ -23,46 +54,21 @@ const pool = require('./main');
 // }
 
 
-async function getIdbyPassword(password) {
-    console.log("in getIdbyPassword() ");
-    const SQL = `select userId from PASSWORDS where password = ?`;
-    const [[theID]] = await pool.query(SQL, [password]);
 
-    if (theID === undefined) {
-        console.log("User not found or password incorrect");
-        // החזרת ערך ברירת המחדל או ניתוח פעולה נוספת
-        return -1; // החזרת ערך ברירת המחדל
-    }
-    return theID;
-}
-async function getIdbyUsername(username) {
-    console.log("in getIdbyUsername() ");
-    const SQL = `select id from users where username = ?`;
-    const [[theID]] = await pool.query(SQL, [username]);
-    return theID;
-}
-async function checkUser(username, password) {
-    console.log("in checkUser() ");
-    const SQL = `SELECT id, username, password
-   FROM users
-   JOIN passwords ON users.id = passwords.userId
-    where username = ? and  password = ?`
-    const [[user]] = await pool.query(SQL, [username, password]);
-    if (user === undefined) {
-        return 0;
-    }
-    else { 
-        console.log(user);
-        return user.id; }
-}
-async function test() {
-    // const data = await checkUser("Bret", 'hildegard.org')
-    // console.log(data);
-}
-test()
-
-module.exports = {
-    getIdbyPassword,
-    getIdbyUsername,
-    checkUser
-};
+// async function getIdbyPassword(password) {
+//     console.log("in getIdbyPassword() ");
+//     const SQL = `select userId from PASSWORDS where password = ?`;
+//     const [[theID]] = await pool.query(SQL, [password]);
+//     if (theID === undefined) {
+//         console.log("User not found or password incorrect");
+//         // החזרת ערך ברירת המחדל או ניתוח פעולה נוספת
+//         return -1; // החזרת ערך ברירת המחדל
+//     }
+//     return theID;
+// }
+// async function getIdbyUsername(username) {
+//     console.log("in getIdbyUsername() ");
+//     const SQL = `select id from users where username = ?`;
+//     const [[theID]] = await pool.query(SQL, [username]);
+//     return theID;
+// }

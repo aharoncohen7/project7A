@@ -1,11 +1,10 @@
 const sql = require('mysql2/promise');
 require("dotenv").config();
 
-// 3306
 const dbConfig = {
     host: "localhost",
     user: "root",
-    database: "sm_users4",
+    database: "db",
 }
 
 const pool = sql.createPool({

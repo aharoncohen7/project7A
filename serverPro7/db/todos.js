@@ -11,9 +11,8 @@ async function getTodosByUserId(id) {
 
 // קבלת מסוים
 async function getCertainTodo(todoId) {
-    console.log("getCertainTodo() ");
     const SQL = `select * from todos where id = ?`;
-    const [todo] = await pool.query(SQL, [todoId]);
+    const [[todo]] = await pool.query(SQL, [todoId]);
     console.log(todo);
     return todo;
 }
@@ -36,11 +35,41 @@ async function searcById(userId, id) {
     return respons;
 }
 
+
+//לפי ביצוע
+async function searcByCompleted(userId, state) {
+    const SQL = `SELECT * FROM todos
+    WHERE userId = ? 
+    AND completed = ?`;
+    const [respons] = await pool.query(SQL, [userId, state]);
+    return respons;
+}
+
+// מיון לפי א ב
+async function getTodosOrderTitle() {
+    const SQL = `select * from todos
+    ORDER BY title;`;
+    const [todos] = await pool.query(SQL);
+    // console.log(todos);
+    return todos;
+}
+// מיון לפי מזהה
+
+async function getTodosOrderId() {
+    const SQL = `select * from todos
+    ORDER BY id;`;
+    const [todos] = await pool.query(SQL);
+    // console.log(todos);
+    return todos;
+}
+
+
+
 // הוספה
 async function addTodo(userId, title) {
-    const SQL = `insert into todos (userId, title) 
-    values (?, ?)`;
-    const [respons] = await pool.query(SQL, [userId, title]);
+    const SQL = `insert into todos (userId, title, completed) 
+    values (?, ?, ?)`;
+    const [respons] = await pool.query(SQL, [userId, title, 0]);
     const newTodo = await getCertainTodo(respons.insertId)
     // console.log(newTodo);
     return newTodo;
@@ -56,9 +85,10 @@ async function updateCompleted(todoId) {
 
 // עריכה
 async function editTodo(todoId, title) {
-    const SQL = `update posts set title = ?
+    const SQL = `update todos set title = ?
     where id = ?`;
     const [respons] = await pool.query(SQL, [title, todoId]);
+    console.log(respons);
     const updatedTodo = await getCertainTodo(todoId)
     return updatedTodo;
 }
@@ -73,18 +103,21 @@ async function deleteTodo(todoId) {
 }
 
 
-// async function test(){
-//     const data = await getTodosByUserId(1);
-//     console.log(data);
+async function test(){
+    const data = await getTodosByUserId(999);
+    console.log(data);
     
-// }
-// test()
+}
+test()
 
 module.exports = {
     getTodosByUserId,
     getCertainTodo,
     searchTodo,
     searcById,
+    searcByCompleted,
+    getTodosOrderId,
+    getTodosOrderTitle,
     addTodo,
     updateCompleted,
     editTodo,

@@ -1,71 +1,71 @@
 const express = require("express");
-const {checkUser} = require('../db/login');
-const getUser = require('../db/users');
-const Joi = require("joi");
 const db = require("../db/comments");
+const IAM = require('../db/monitoring');
 const commentsRoute = express.Router();
 
 
-// אימות
-async function authenticate(req, res, next){
-     const auth = req.headers.auth;
-     const [username, password] = auth.split(':');
-     const check = await checkUser(username, password);
-     if(!check){
-        res.status(400).send()
-        return;
-     }
-     const user = await getUser(check)
-     req.user = user;
-     next();
-    }
-// קבלת כל התגובות לפוסט מסוים
-commentsRoute.get("/:postId", async (req, res) => {
-    // if(req.user.id===parseInt(req.params.postId)){
+// Get all comments for a particular post
+commentsRoute.get("/:postId",IAM.validationParams, async (req, res) => {
     try {
-        const comments = await db.getCommentsByUserId(req.params.postId);
+
+
+
+        const comments = await db.getCommentsByPostId(req.params.postId);
         if (comments) {
-            res.json(comments);
+            res.status(200).json(comments);
             return;
         }
         res.status(404).send();
     } catch (error) {
-        res.status(500).send();
+        res.status(500).send(error.message);
     }
-// }
-    // else{
-    //     res.status(404).send();
-    // }
 });
-// קבלת תגובה מסוימת
-commentsRoute.get("/:commentId/", async (req, res) => {
+
+// Get a certain comment
+commentsRoute.get("/s/:commentId/",IAM.validationParams, async (req, res) => {
     try {
         const comment = await db.getCertainComment(req.params.commentId);
         if (comment) {
-            res.json(comment);
+            res.status(200).json(comment);
             return;
         }
         res.status(404).send();
     } catch (error) {
-        res.status(500).send();
+        res.status(500).send(error.message);
     }
 });
-// הוספת תגובה
-commentsRoute.post("/", async (req, res) => {
+
+//adding comments
+commentsRoute.post("/",IAM.handleNewComment, async (req, res) => {
     try {
-        const newComment = await db.addPost(req.body.postId, req.body.name, req.body.email, req.body.body);
+        const isPostExist = await db.isPostExist(req.body.postId)
+        if(!isPostExist) {
+            res.status(400).send("It is impossible to add a comment to a post that does not exist");
+        }
+        const newComment = await db.addComment(req.body.postId, req.user.name, req.user.email, req.body.body);
         if (newComment) {
             res.status(201).json(newComment);
             return;
         }
         res.status(400).send();
     } catch (error) {
-        res.status(500).send();
+        res.status(500).send(error.message)
     }
 });
-//מחיקת תגובה
-commentsRoute.delete("/:commentId", async (req, res) => {
+
+//deleting comment
+commentsRoute.delete("/:commentId",IAM.validationParams, async (req, res) => {
     try {
+        const [comment] = await db.getCertainComment(req.params.commentId);
+        if (comment==undefined ) {
+            res.status(404).send();
+            return;
+        }
+        const ownerId = await db.checkOwnerComment(comment.email)
+        if (req.user.id !== ownerId) {
+            res.status(400).send("You are not allowed to delete this comment");
+            return;
+        }
         const deletedComment = await db.deleteComment(req.params.commentId);
         if (deletedComment) {
             res.json(deletedComment);
@@ -73,7 +73,7 @@ commentsRoute.delete("/:commentId", async (req, res) => {
         }
         res.status(404).send();
     } catch (error) {
-        res.status(500).send();
+        res.status(500).send(error.message);
     }
 });
 

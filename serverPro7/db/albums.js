@@ -1,24 +1,21 @@
 const pool = require('./main');
 
-// כל האלבומים
-async function getAlbums(id) {
-    console.log("getAlbums() ");
+// All albums
+async function getAlbumsByUserId(id) {
     const SQL = `select * from albums where userId = ?`;
     const [albums] = await pool.query(SQL, [id]);
-    // console.log(albums);
     return albums;
 }
 
-// אלבום מסוים
+// a particular album
 async function getCertainAlbum(albumId) {
-    console.log("getCertainAlbum() ");
     const SQL = `select * from albums where id = ?`;
     const [album] = await pool.query(SQL, [albumId]);
-    console.log(album);
+
     return album;
 }
 
-// חיפוש לפי כותרת
+// Search by title
 async function searchAlbums(userId, title) {
     const SQL = `SELECT * FROM albums
     WHERE userId = ?
@@ -27,7 +24,7 @@ async function searchAlbums(userId, title) {
     return respons;
 }
 
-// חיפוש לפי מזהה
+// Search by ID
 async function searcById(userId, id) {
     const SQL = `SELECT * FROM albums
     WHERE userId = ?
@@ -35,6 +32,24 @@ async function searcById(userId, id) {
     const [respons] = await pool.query(SQL, [userId]);
     return respons;
 }
+
+
+// sort by abc
+async function getAlbumsOrderTitle() {
+    const SQL = `select * from albums
+    ORDER BY title;`;
+    const [albums] = await pool.query(SQL);
+    return albums;
+}
+
+// Sort by ID
+async function getAlbumsOrderId() {
+    const SQL = `select * from albums
+    ORDER BY id;`;
+    const [albums] = await pool.query(SQL);
+    return albums;
+}
+
 
 // async function test(){
 //     const data = await searchAlbums("a")
@@ -44,8 +59,10 @@ async function searcById(userId, id) {
 
 
 module.exports = {
-    getAlbums,
+    getAlbumsByUserId,
     getCertainAlbum,
     searchAlbums,
-    searcById
+    searcById,
+    getAlbumsOrderId,
+    getAlbumsOrderTitle
 };

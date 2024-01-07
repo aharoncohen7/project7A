@@ -1,12 +1,26 @@
 const express = require("express");
 const Joi = require("joi");
 const db = require("../db/photos");
-const IAM = require('../db/monitoring');
-
+const {checkUser} = require('../db/login');
+const getUser = require('../db/users');
 const photosRoute = express.Router();
+// אימות
+async function authenticate(req, res, next){
+     const auth = req.headers.auth;
+     const [username, password] = auth.split(':');
+     const check = await checkUser(username, password);
+     if(!check){
+        res.status(400).send()
+        return;
+     }
+     const user = await getUser(check)
+     req.user = user;
+     next();
+    }
 
-// Get photos from a specific album
-photosRoute.get("/:albumId", IAM.validationParams,async (req, res) => {
+// קבלת תמונות מאלבום
+photosRoute.get("/:albumId", async (req, res) => {
+    // if(req.user.id===parseInt(req.params.postId)){
     try {
         const album = await db.getPhotos(req.params.albumId);
         if (album) {
@@ -14,49 +28,46 @@ photosRoute.get("/:albumId", IAM.validationParams,async (req, res) => {
             return;
         }
         res.status(404).send();
-        
-  
     } catch (error) {
         res.status(500).send();
     }
-
+// }
+    // else{
+    //     res.status(404).send();
+    // }
 });
 
-// get certain image
-photosRoute.get("/:photoId",IAM.validationParams, async (req, res) => {
+// קבלת תמונה מסויימת
+photosRoute.get("/:albumId", async (req, res) => {
     try {
-      
-        const photo = await db.getCertainPhoto(req.params.photoId);
+        const post = await db.getCertainPhoto(req.params.albumId);
         if (photo) {
             res.json(photo);
             return;
         }
         res.status(404).send();
-       
     } catch (error) {
         res.status(500).send();
     }
 });
 
-// Image editing
-photosRoute.patch("/:photoId",IAM.validationParams, async (req, res) => {
+// עריכת תמונה
+photosRoute.put("/:photoId", async (req, res) => {
         try {
-          
             const photo = await db.editPhoto(req.params.photoId, req.body.title, req.body.url);
             if (photo) {
                 res.json(photo);
                 return;
             }
             res.status(404).send();
-           
         } catch (error) {
             res.status(500).send();
         }
     }
 );
 
-// Deleting images 
-photosRoute.delete("/:photoId",IAM.validationParams, async (req, res) => {
+// מחיקת תמונה
+photosRoute.delete("/:photoId", async (req, res) => {
     try {
         const deletedphoto = await db.deletePhoto(req.params.photoId);
         if (deletedphoto) {

@@ -1,31 +1,46 @@
 const express = require("express");
+const Joi = require("joi");
 const db = require("../db/albums");
-const IAM = require('../db/monitoring');
+const {checkUser} = require('../db/login');
+const getUser = require('../db/users');
+
 const albumsRoute = express.Router();
 
+// אימות
+async function authenticate(req, res, next){
+     const auth = req.headers.auth;
+     const [username, password] = auth.split(':');
+     const check = await checkUser(username, password);
+     if(!check){
+        res.status(400).send()
+        return;
+     }
+     const user = await getUser(check)
+     req.user = user;
+     next();
+    }
 
-// Get all user albums
-albumsRoute.get("/:userId",IAM.validationParams, async (req, res) => {
+// קבלת כל אלבומי משתמש
+albumsRoute.get("/:userId", async (req, res) => {
+    // if(req.user.id===parseInt(req.params.userId)){
     try {
-        if(req.user.id===parseInt(req.params.userId)){
         const albums = await db.getAlbumsByUserId(req.params.userId);
         if (albums) {
             res.json(albums);
             return;
         }
         res.status(404).send();
-    }
-    else{
-        res.status(400).send("you are not allowed to get this album");
-    }
     } catch (error) {
         res.status(500).send();
     }
-
+// }
+    // else{
+    //     res.status(404).send();
+    // }
 });
 
-// Get a specific album
-albumsRoute.get("/:albumId/",IAM.validationParams, async (req, res) => {
+// קבלת אלבום מסויים
+albumsRoute.get("/:albumId/", async (req, res) => {
     try {
         const album = await db.getCertainAlbum(req.params.albumId);
         if (album) {
@@ -38,8 +53,8 @@ albumsRoute.get("/:albumId/",IAM.validationParams, async (req, res) => {
     }
 });
 
-// Search by title
-albumsRoute.get("/searchAlbums/:userId/:str",IAM.validationParams, async (req, res) => {
+// חיפוש לפי כותרת
+albumsRoute.get("/searchAlbums/:userId/:str", async (req, res) => {
     try {
         const albums = await db.searchAlbums(req.params.userId, req.params.str);
         if (albums) {
@@ -52,8 +67,8 @@ albumsRoute.get("/searchAlbums/:userId/:str",IAM.validationParams, async (req, r
     }
 });
 
-// Search by ID
-albumsRoute.get("/searcById/:userId/str",IAM.validationParams, async (req, res) => {
+// חיפוש לפי מזהה
+albumsRoute.get("/searcById/:userId/str", async (req, res) => {
     try {
         const albums = await db.searcById(req.params.userId, req.params.str);;
         if (albums) {

@@ -39,12 +39,12 @@ async function editPhoto(photoId, title, url) {
 // מחיקת תמונה
 async function deletePhoto(photoId) {
     console.log("deletePhoto() ");
-    const deletedPhoto = await getCertainPhoto(photoId)
+    const [deletedPhoto] = await getCertainPhoto(photoId)
     const SQL = `delete from photos where id = ?`;
-    const [photo] = await pool.query(SQL, [photoId]);
+    const [[photo]] = await pool.query(SQL, [photoId]);
     console.log(typeof photo);
     console.log(deletedPhoto);
-    return [photo, deletedPhoto];
+    return photo;
 }
 
 module.exports = {
