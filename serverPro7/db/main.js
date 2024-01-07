@@ -11,7 +11,7 @@ const pool = sql.createPool({
     host: dbConfig.host,
     user: dbConfig.user,
     database: dbConfig.database,
-    password: process.env.SQL_PASSWORD
+    password: "43534613"
 });
 
 console.log("create pool");
