@@ -52,7 +52,7 @@ async function searcById(id) {
 
 // הוספה
 async function addPost(userId, title, body) {
-    console.log("addPost() ");
+    // console.log("addPost() ");
     const SQL = `insert into posts (userId, title, body) 
     values (?, ?, ?)`;
     const [respons] = await pool.query(SQL, [userId, title, body]);

@@ -4,6 +4,29 @@ const IAM = require('../db/monitoring');
 const albumsRoute = express.Router();
 
 
+// creation
+albumsRoute.post("/", IAM.handleNewTodo, async (req, res) => {
+    try {
+        
+        if (req.body.userId !== req.user.id) {
+            res.status(400).send();
+            return
+        }
+        
+        const newAlbum = await db.addAlbum(req.body.userId, req.body.title);
+        
+        if (newAlbum) {
+            res.status(201).json(newAlbum );
+            return;
+        }
+        res.status(400).send();
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
+
 // Get all user albums
 albumsRoute.get("/:userId",IAM.validationParams, async (req, res) => {
     try {

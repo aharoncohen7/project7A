@@ -2,10 +2,10 @@ const pool = require('./main');
 
 // קבלת כל משימות
 async function getTodosByUserId(id) {
-    console.log("getTodos() ");
+    // console.log("getTodos() ");
     const SQL = `select * from todos where userId = ?`;
     const [todos] = await pool.query(SQL, [id]);
-    console.log(todos);
+    // console.log(todos);
     return todos;
 }
 

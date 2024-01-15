@@ -1,5 +1,16 @@
 const pool = require('./main');
 
+
+// add
+async function addAlbum(userId, title) {
+    const SQL = `insert into albums (userId, title) 
+    values (?, ?)`;
+    const [respons] = await pool.query(SQL, [userId, title]);
+    const newAlbum = await getCertainAlbum(respons.insertId)
+    console.log(newAlbum);
+    return newAlbum;
+}
+
 // All albums
 async function getAlbumsByUserId(id) {
     const SQL = `select * from albums where userId = ?`;
@@ -10,7 +21,7 @@ async function getAlbumsByUserId(id) {
 // a particular album
 async function getCertainAlbum(albumId) {
     const SQL = `select * from albums where id = ?`;
-    const [album] = await pool.query(SQL, [albumId]);
+    const [[album]] = await pool.query(SQL, [albumId]);
 
     return album;
 }
@@ -59,10 +70,12 @@ async function getAlbumsOrderId() {
 
 
 module.exports = {
+    addAlbum,
     getAlbumsByUserId,
     getCertainAlbum,
     searchAlbums,
     searcById,
     getAlbumsOrderId,
     getAlbumsOrderTitle
+    
 };

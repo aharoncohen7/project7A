@@ -3,7 +3,7 @@ const pool = require('./main');
 
 // Get all COMMENTS
 async function getCommentsByPostId(postId) {
-    console.log("getComments() ");
+    // console.log("getComments() ");
     const SQL = `select * from comments where postId = ?`;
     const [comments] = await pool.query(SQL, [postId]);
     return comments;
@@ -11,7 +11,7 @@ async function getCommentsByPostId(postId) {
 
 // Get a particular comment
 async function getCertainComment(commentId) {
-    console.log("getCertainComment() ");
+    // console.log("getCertainComment() ");
     const SQL = `select * from comments where id = ?`;
     const [comment] = await pool.query(SQL, [commentId]);
     return comment;
@@ -42,7 +42,7 @@ async function deleteComment(commentId) {
 }
 
 
-// Checking the owner of the response
+// Checking the owner of the comment
 async function checkOwnerComment(commentEmail) {
     const SQL = `SELECT users.id
     FROM users

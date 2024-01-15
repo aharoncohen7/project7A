@@ -3,10 +3,10 @@ const pool = require('./main');
 
 //Get specific user
 async function getUser(id) {
-    console.log("in getUser() ");
+    // console.log("in getUser() ");
     const SQL = `select * from users where id = ?`;
     const [[user]] = await pool.query(SQL, [id]);
-    console.log(user);
+    // console.log(user);
     return user;
 }
 
@@ -44,7 +44,7 @@ async function authenticate(req, res, next) {
         req.user = user;
         next();
     } catch (err) {
-        console.log(err);
+        console.error(err);
         res.status(500).send();
     }
 }
@@ -84,6 +84,47 @@ function handleNewPost(req, res, next) {
     }
     next();
 }
+
+
+// New photo validation
+function handleNewPhoto(req, res, next) {
+    console.log("handleNewPhoto");
+    const schema = Joi.object({
+        title: Joi.string().max(20).required(),
+        url: Joi.string().required(),
+        albumId: Joi.number().min(1).required(),
+        userId: Joi.number().min(1).max(10).required()
+       
+    })
+    const { error } = schema.validate(req.body);
+    if (error) {
+        console.log(error.details[0].message);
+        res.status(400).send(error.details[0].message);
+        return;
+    }
+    next();
+}
+
+
+// New photo validation
+function handleEditPhoto(req, res, next) {
+    console.log("handleEditePhoto");
+    const schema = Joi.object({
+        title: Joi.string().max(80).required(),
+        url: Joi.string().required(),
+        albumId: Joi.number().min(1).required(),
+                       
+    })
+    const { error } = schema.validate(req.body);
+    if (error) {
+        console.error(error.details[0].message);
+        res.status(400).send(error.details[0].message);
+        return;
+    }
+    next();
+}
+
+
 
 //Validation post editing
 function handleEditPost(req, res, next) {
@@ -161,8 +202,9 @@ module.exports = {
     handleEditTodo,
     handleNewTodo,
     validationState,
-    handleNewComment
-
+    handleNewComment,
+    handleNewPhoto,
+    handleEditPhoto
    };
    
    

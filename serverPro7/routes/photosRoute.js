@@ -38,11 +38,50 @@ photosRoute.get("/:photoId",IAM.validationParams, async (req, res) => {
     }
 });
 
+
+// creation
+photosRoute.post("/", IAM.handleNewPhoto, async (req, res) => { 
+    try {
+        const owner = await db.checkOwnerFhoto(req.body.albumId);
+        if(!owner) {
+            console.log("i am here ");
+            res.status(404).send();
+        }
+        if(owner!=req.user.id){
+            console.log("i am here 2");
+            res.status(400).send("You are not allowed to add photo to this album");
+            return
+        }
+        console.log({1:req.body.userId, 2:req.body.albumId,3: req.body.title, 4:req.body.url});
+        const [newPhoto] = await db.addPhoto(req.body.albumId, req.body.title, req.body.url);
+        if (newPhoto) {
+            res.status(201).json(newPhoto);
+            return;
+        }
+        res.status(400).send();
+    } catch (error) {
+        res.status(500).send(error);
+    }
+});
+
+
 // Image editing
-photosRoute.patch("/:photoId",IAM.validationParams, async (req, res) => {
+photosRoute.patch("/:photoId",IAM.handleEditPhoto, async (req, res) => {
+    console.log("step1");
         try {
-          
+            const owner = await db.checkOwnerFhoto(req.body.albumId);
+            if(!owner) {
+                console.log("i am here ");
+                res.status(404).send();
+            }
+            if(owner!=req.user.id){
+                console.log("i am here 2");
+                res.status(400).send("You are not allowed to edit this photo");
+                return
+            }
+            console.log({2:req.body.albumId,3: req.body.title, 4:req.body.url});
             const photo = await db.editPhoto(req.params.photoId, req.body.title, req.body.url);
+            console.log("step4");
             if (photo) {
                 res.json(photo);
                 return;
